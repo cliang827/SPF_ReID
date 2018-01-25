@@ -1,4 +1,4 @@
-% for git test
+% for github test
 clear
 clc
 close all
