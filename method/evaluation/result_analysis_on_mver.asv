@@ -1,0 +1,63 @@
+close all
+clear all
+clc
+
+%% test: temp_1
+init_Y_method = 'p2g';  
+init_V = 0.1;
+norm_type = 2;
+alpha_init_order = -5:3:1;
+beta_init_order = 0:0.4:1;
+gamma_init_order = -8;
+delta = [0 0.5 1];
+max_iter_times = 5;
+
+alpha_num = length(alpha_init_order);
+beta_num = length(beta_init_order);
+delta_num = length(delta);
+cmc_mat = zeros(alpha_num, beta_num, delta_num);
+time_mat = zeros(alpha_num, beta_num, delta_num);
+
+test_rank = 20;
+fig = figure(1);
+for l=1:2
+    if l==1
+        result_dir = '.\temp\';
+        result_type = 'mver';
+    elseif l==2
+        result_dir = '.\temp5\';
+        result_type = 'nver';
+    end
+    
+    
+    for k = 1:delta_num
+        for i = 1:alpha_num
+            for j=1:beta_num
+                exp_name = sprintf('%s_%.3f_%.3f_%.3f_%.3f_%.3f_%.3f_%.3f', ...
+                    init_Y_method, init_V(l), norm_type, alpha_init_order(i), beta_init_order(j), gamma_init_order, ...
+                    delta(k), max_iter_times);
+                load([result_dir exp_name '\exp_report.mat']);
+                cmc_mat(i,j,k) = cmc_result(test_rank);
+                time_mat(i,j,k) = run_time;
+                fprintf(1, '%s [%f]: CMC@1=%.2f%%, CMC@2=%.2f%%, CMC@5=%.2f%%, CMC@10=%.2f%%, CMC@20=%.2f%%\n', ...
+                    exp_name, run_time, 100*cmc_result(1), 100*cmc_result(2), 100*cmc_result(5), 100*cmc_result(10), 100*cmc_result(20)); 
+            end
+        end
+
+        subplot(2,delta_num+1,(l-1)*(delta_num+1)+k);
+        [X,Y] = meshgrid(beta_init_order, alpha_init_order);
+        Z = cmc_mat(:,:,k);
+        mesh(X,Y,Z);
+        title(sprintf('result type=%s, delta = %.3f', init_V(l), delta(k)));
+        xlabel('beta init order');ylabel('alpha init order');zlabel(sprintf('CMC@%d',test_rank));
+    end
+
+    subplot(2,delta_num+1,(l-1)*(delta_num+1)+k+1);
+    [X,Y] = meshgrid(beta_init_order, alpha_init_order);
+    Z = mean(cmc_mat,3);
+    mesh(X,Y,Z);
+    title(sprintf('init V=%.3f, everage over delta', init_V(l)));
+    xlabel('beta init order');ylabel('alpha init order');zlabel(sprintf('CMC@%d',test_rank));
+end
+
+

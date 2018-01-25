@@ -1,0 +1,17 @@
+clear
+clc
+
+exp_name = 'p2g_0.200_2.000_-3.000_0.500_-1.000_1.000';
+exp
+files = dir(['.\temp\' exp_name '\details\']);
+for i=3:length(files)
+    load(['.\temp\' exp_name '\details\' files(i).name]);
+    a= 1;
+end
+
+
+
+
+
+
+    

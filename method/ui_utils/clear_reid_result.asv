@@ -1,0 +1,46 @@
+function clear_reid_result()
+
+% step1: clear groundtruth info
+st_text_current_rank_handle = findobj(0,'Tag','st_text_current_rank');
+set(st_text_current_rank_handle, 'Visible', 'off');
+curr_groundtruth_rank_handle = findobj(0,'Tag','textgroundtruth_rank_a');
+set(curr_groundtruth_rank_handle, 'String', '');
+
+st_text_current_rank_handle = findobj(0,'Tag','st_text_last_rank');
+set(st_text_current_rank_handle, 'Visible', 'off');
+curr_groundtruth_rank_handle = findobj(0,'Tag','textgroundtruth_rank_c');
+set(curr_groundtruth_rank_handle, 'String', '');
+
+% step2: clear page info
+setappdata(0, 'page_id', 0);
+
+et_page_id_handle = findobj(0, 'Tag', 'et_page_id');
+set(et_page_id_handle, 'String', '');
+
+st_tot_page_num_handle = findobj(0, 'Tag', 'st_tot_page_num');
+set(st_tot_page_num_handle, 'String', '');
+
+% step3: clear button status
+pb_previous_handle = findobj(0,'Tag','previous');
+pb_next_handle = findobj(0,'Tag','next');
+pb_jump_handle = findobj(0,'Tag', 'jump');
+
+set(pb_previous_handle, 'enable', 'off');
+set(pb_next_handle, 'enable', 'off');
+set(pb_jump_handle, 'enable', 'off');
+
+% step4: clear feedback info in table
+uitable_handle = findobj(0,'Tag','uitable');
+uitable_data = {'','','','','';'','','','','';'','','','','';'','','','','';'','','','',''};
+set(uitable_handle, 'Data', uitable_data);
+
+st_tot_feedback_gallery_num_handle = findobj(0,'Tag','st_tot_feedback_gallery_num');
+st_tot_pos_box_num_handle = findobj(0,'Tag','st_tot_pos_box_num');
+st_tot_neg_box_num_handle = findobj(0,'Tag','st_tot_neg_box_num');
+set(st_tot_feedback_gallery_num_handle, 'String', '');
+set(st_tot_pos_box_num_handle, 'String', '');
+set(st_tot_neg_box_num_handle, 'String', '');
+
+% step5: clear gallery images
+global image_num_per_page
+for i=1:num

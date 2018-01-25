@@ -1,0 +1,71 @@
+function result_analysis()
+
+load('.\temp\exp_para_set.mat');
+dirs = dir('.\temp\');
+
+para_name_tab = fieldnames(exp_para_list);
+para_num = length(para_name_tab);
+tested_para_ix_table = zeros(length(dirs)-3, para_num);
+
+cmc_table = [];
+exp_times = 0;
+
+% step 1: 恢复出测试过的参数序列
+for i=1:length(dirs)
+    if strcmp(dirs(i).name, '.') || strcmp(dirs(i).name, '..') || strcmp(dirs(i).name, 'exp_para_set.mat')
+        continue;
+    end
+    
+    nchar = fprintf(1, 'file parsing no.%d/%d (%.2f%%) ...', i, length(dirs), 100*i/length(dirs));
+    
+    exp_times = exp_times + 1;
+    ix_pos = strfind(dirs(i).name, '_');
+
+    for j=1:para_num
+
+        if j==1
+            para_value = dirs(i).name(1:ix_pos(j)-1);
+            para_list = exp_para_list.(para_name_tab{j}); 
+            tested_para_ix_table(exp_times, j) = find(strcmp(para_list, para_value)==1);
+            
+        elseif j<para_num
+            para_value = int16(1e3*str2double(dirs(i).name(ix_pos(j-1)+1:ix_pos(j)-1)));
+            para_list = int16(1e3*exp_para_list.(para_name_tab{j})); 
+            tested_para_ix_table(exp_times, j) = find(para_list==para_value);
+        else
+            para_value = int16(1e3*str2double(dirs(i).name(ix_pos(j-1)+1:end)));
+            para_list = int16(1e3*exp_para_list.(para_name_tab{j})); 
+            tested_para_ix_table(exp_times, j) = find(para_list==para_value);
+        end
+    end
+
+    load(['.\temp\' dirs(i).name '\exp_report.mat']);
+    cmc_table = cat(2, cmc_table, cmc_result);
+    
+    fprintf(1, repmat('\b', 1, nchar));
+end
+
+% step 2: 寻找最优的参数配置
+test_rank_threshold = 20;
+highest_cmc_value = max(cmc_table(test_rank_threshold,:));
+best_para_set_ix = tested_para_ix_table(cmc_table(test_rank_threshold,:)==highest_cmc_value,:);
+
+for i=1:para_num
+    para_ix = unique(best_para_set_ix(:,i));
+    para_list = exp_para_list.(para_name_tab{i}); 
+    for j=1:length(para_ix)
+        
+        if i==1
+            fprintf(1, '%s: %s\n', para_name_tab{i}, para_list{para_ix});
+        else
+            fprintf(1, '%s: %f\n', para_name_tab{i}, para_list(para_ix));
+        end
+    end
+end
+
+
+
+
+
+
+    
