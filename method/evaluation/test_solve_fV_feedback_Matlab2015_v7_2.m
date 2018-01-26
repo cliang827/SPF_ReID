@@ -81,6 +81,15 @@ else
     batch_size = 1;
 end
 
+% generate handles for parameter delivery among various procs
+method_num = 2;
+proc_handles = gobjects(method_num, batch_size); % row 1: pcm14; % row 2: ours
+for i=1:method_num
+    for j=1:batch_size
+        proc_handles(i,j) = figure('visible', 'off');
+    end
+end
+
 exp_times = size(exp_para_set, 1);
 for i=1:exp_times                                               % traverse all model parameter configurations
     for repeat_times=1:tot_repeat_times                         % repeat XX times to randonmize the feedback info
@@ -124,7 +133,7 @@ for i=1:exp_times                                               % traverse all m
                     ix_info_tab = [start+j; query_times; repeat_times];       % probe_id, query_times, repeat_times 
                     
                     [f_bat_for_pcm14{query_times, j}, feedback_set_for_pcm14{query_times, j}, f_delta_bat_for_pcm14{query_times, j}] = ...
-                        test_baseline_pcm14_v4(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab);
+                        test_baseline_pcm14_v4(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab, proc_handles(1,j));
                     
                     [f_bat{query_times, j}, V_bat{query_times, j}, para_set_bat{query_times, j}, J_val_bat{query_times, j}, iter_fVs_bat{query_times, j}] = ...
                         solve_fV_test6(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab);   
@@ -172,7 +181,7 @@ for i=1:exp_times                                               % traverse all m
         
         start = s*batch_size;
         res = dataset_size - start;
-        parfor j = 1:res %parfor j = 1:res
+        for j = 1:res %parfor j = 1:res
             for query_times=1:tot_query_times
                 ix_info_tab = [start+j; query_times; repeat_times];       % probe_id, query_times, repeat_times    
                 
@@ -256,6 +265,11 @@ if ~isempty(gcp('nocreate'))>0
     delete(gcp('nocreate'))
 end
 
+for i=1:method_num
+    for j=1:batch_size
+        close(proc_handles(i,j));
+    end
+end
 %%
 tot_repeat_times = ctrl_para.tot_repeat_times;
 tot_query_times = length(ctrl_para.fbppr);
