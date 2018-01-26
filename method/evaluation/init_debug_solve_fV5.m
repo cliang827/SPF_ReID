@@ -127,13 +127,13 @@ else
             % step a: do pcm14 to get f_delta
             switch ctrl_para.feedback_type
                 case 'nv'
-%                     parse_nv_feedback_info_for_pcm14_v2;
-%                     Y_delta = pcm14_core_v3(ctrl_para, feedback_set);
-                    Y_delta = getappdata(0, 'f_delta');
+                    parse_nv_feedback_info_for_pcm14_v2;
+                    
                 case 'v'
 %                     parse_feedback_info_for_pcm14; % 这个位置不行，要改　parse_ｖ_feedback_info_for_pcm14
-                    Y_delta = zeros(n,1);
+                    error('need further revision!');
             end
+            Y_delta = pcm14_core_v3(ctrl_para, feedback_set);
             
 
             % step b: do icip13 to get Y_last
