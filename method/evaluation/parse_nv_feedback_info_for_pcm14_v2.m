@@ -12,7 +12,7 @@ if ~feedback_info.consider_groundtruth_flag_for_pcm14(repeat_times) && ...
         ctrl_para.include_groundtruth_in_the_first_page_flag && ...
         curr_groundtruth_rank<=ctrl_para.image_num_per_page
     
-    feedback_info = getappdata(0, 'feedback_info');
+%     feedback_info = getappdata(0, 'feedback_info');
     rand_feedback_ix_for_pcm14 = feedback_info.rand_feedback_ix_for_pcm14;
     [~,tot_query_times, ~] = size(rand_feedback_ix_for_pcm14);
     [gallery_name_tab, ~] = feedback_stat(feedback_info);
@@ -56,12 +56,12 @@ if ~feedback_info.consider_groundtruth_flag_for_pcm14(repeat_times) && ...
     
     feedback_info.consider_groundtruth_flag_for_pcm14(repeat_times) = 1;
     feedback_info.rand_feedback_ix_for_pcm14 = rand_feedback_ix_for_pcm14;
-    setappdata(0, 'feedback_info', feedback_info);
+    setappdata(proc_handle, 'feedback_info', feedback_info);
 end
     
 % step 2: change index in feedback_info to that of prbgal_name_tab
 prbgal_name_tab = ctrl_para.prbgal_name_tab;
-feedback_info = getappdata(0, 'feedback_info');
+% feedback_info = getappdata(0, 'feedback_info');
 feedback_set_temp = feedback_info.rand_feedback_ix_for_pcm14{repeat_times, query_times};
 [~, part_feedback_pair_num, ~] = size(feedback_set_temp);
 for i=1:2

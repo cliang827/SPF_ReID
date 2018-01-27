@@ -35,7 +35,7 @@ if 1==query_times
         A(I==1) = 0;
         W(:,:,k) = A;
     end
-    setappdata(0, 'W', W);
+    setappdata(proc_handle, 'W', W);
 
     % step 2.2: compute Y
     switch init_Y_method
@@ -59,52 +59,47 @@ if 1==query_times
     Y0(2:end, :) = exp(-1*dist);         % initialize reference ranking score matrix
     Y0(:,1) = normalization(Y0(:,1), [-1 1], 0);
     Y0(:,2) = normalization(Y0(:,2), [-1 1], 0);
-    setappdata(0, 'Y0', Y0);
+    setappdata(proc_handle, 'Y0', Y0);
     
     % step 2.3: compute f0
     f0 = [1; init_reid_score(:, probe_id)];
     f0 = normalization(f0, [-1 1], 0);
-    setappdata(0, 'f0', f0);
+    setappdata(proc_handle, 'f0', f0);
     
     % step 2.4: compute V0
     v0 = expected_feedback_num/n;
     V0 = [0 0; repmat(v0, n, 2)];            % suggestive degree matrix
-    setappdata(0, 'V0', V0);
+    setappdata(proc_handle, 'V0', V0);
     
     % step 2.5: compute FBL
     FBL = zeros(n,2);                    % survival rounds of feedback galleries
     
     % step 2.6: save feedback_info (for parsing when query_times>1)
-    setappdata(0, 'feedback_info', feedback_info);
+    setappdata(proc_handle, 'feedback_info', feedback_info);
 else
 
     
     % step 2.8: recover W and dist
-    W = getappdata(0, 'W');
+    W = getappdata(proc_handle, 'W');
     
     % step 2.9 update V0
-    V0 = getappdata(0, 'V0');
-    V_last = cat(1, [0 0], getappdata(0, 'V'));
+    V0 = getappdata(proc_handle, 'V0');
+    V_last = cat(1, [0 0], getappdata(proc_handle, 'V'));
     V0 = V0*(1-update_ratio) + V_last*update_ratio;
-    setappdata(0, 'V0', V0);
+    setappdata(proc_handle, 'V0', V0);
     
     % step 2.10 update f0
-    f0 = getappdata(0, 'f0');
-    curr_reid_score = getappdata(0, 'curr_reid_score');
+    f0 = getappdata(proc_handle, 'f0');
+    curr_reid_score = getappdata(proc_handle, 'curr_reid_score');
     f_last = [1; curr_reid_score];
     f0 = f0*(1-update_ratio) + f_last*update_ratio;
-    setappdata(0, 'f0', f0);    
+    setappdata(proc_handle, 'f0', f0);    
     
     % step 2.7: parse feedback info
-    switch ctrl_para.feedback_type
-        case 'nv'
-            parse_nv_feedback_info;
-        case 'v'
-            parse_v_feedback_info;
-    end
+    feedback_info = getappdata(proc_handle, 'feedback_info');
     
     % step 2.11: recover Y0
-    Y0 = getappdata(0, 'Y0');
+    Y0 = getappdata(proc_handle, 'Y0');
     switch ctrl_para.Y_last_method
         case 'icip13-manifold-ranking'
             Y_last = zeros(m,2);
@@ -120,14 +115,16 @@ else
             end
             
         case 'pcm14'
-            Y_last = repmat([1; getappdata(0, 'curr_reid_score_for_pcm14')], 1, 2);
+            Y_last = repmat([1; getappdata(proc_handle, 'curr_reid_score_for_pcm14')], 1, 2);
             
         case 'test'
             % method description: icip13(manifold learning) + pcm14(f_delta)
             % step a: do pcm14 to get f_delta
             switch ctrl_para.feedback_type
                 case 'nv'
+                    f0 = f0(2:end);
                     parse_nv_feedback_info_for_pcm14_v2;
+                    f0 = [1; f0];
                     
                 case 'v'
 %                     parse_feedback_info_for_pcm14; % 这个位置不行，要改　parse_ｖ_feedback_info_for_pcm14
@@ -158,7 +155,16 @@ else
             error('please identify the Y update method!');
     end        
     Y0 = Y0*(1-update_ratio) + Y_last*update_ratio;
-    setappdata(0, 'Y0', Y0);
+    setappdata(proc_handle, 'Y0', Y0);
+    
+    % feedback_info
+    switch ctrl_para.feedback_type
+        case 'nv'
+            parse_nv_feedback_info;
+        case 'v'
+            parse_v_feedback_info;
+    end
+    
     
     % step 2.12: translate feedback info
     [Y0, V0, FBL] = translate_feedback_info(Y0, V0, query_times, prbgal_name_tab, feedback_info);

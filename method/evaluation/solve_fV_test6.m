@@ -1,8 +1,13 @@
-function [f, V, model_para, J_val, iter_fVs] = solve_fV_test6(ctrl_para, feedback_info, groundtruth_feedback, ix_info_tab) %#ok<*STOUT,*INUSD>
+function [f, V, model_para, J_val, iter_fVs] = solve_fV_test6(...
+    ctrl_para, ...
+    feedback_info, ...
+    groundtruth_feedback, ...
+    ix_info_tab, ...
+    proc_handle) %#ok<*STOUT,*INUSD>
+
 
 DEBUG_FLAG = ctrl_para.DEBUG_FLAG;
 SHOW_DETAILS = ctrl_para.SHOW_DETAILS;
-
 
 if DEBUG_FLAG
     init_debug_solve_fV5;
@@ -74,7 +79,9 @@ while 1
     %% break check
     iter_fVs{iter_times}.f = f(2:end);
     iter_fVs{iter_times}.V = V(2:end,:);
-    if abs(J_val(1,iter_times)-J_val(2,iter_times))/abs(J_val(2,iter_times))<epsilon_J || iter_times>=outer_loop_max_iter_times || 1==query_times
+    if abs(J_val(1,iter_times)-J_val(2,iter_times))/abs(J_val(2,iter_times))<epsilon_J || ...
+            iter_times>=outer_loop_max_iter_times || ...
+            1==query_times
         break;
     end
 end
@@ -94,9 +101,9 @@ end
 if 1==query_times
     last_reid_score = [];
 else
-    last_reid_score = getappdata(0, 'curr_reid_score');
+    last_reid_score = getappdata(proc_handle, 'curr_reid_score');
 end
-setappdata(0, 'curr_reid_score', f);
-setappdata(0, 'last_reid_score', last_reid_score);
-setappdata(0, 'V', V);
+setappdata(proc_handle, 'curr_reid_score', f);
+setappdata(proc_handle, 'last_reid_score', last_reid_score);
+setappdata(proc_handle, 'V', V);
 

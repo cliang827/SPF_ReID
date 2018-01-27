@@ -3,12 +3,14 @@
 
 %step1: add groundtruth feedback
 image_num_per_page = ctrl_para.image_num_per_page;
-curr_reid_score = getappdata(0, 'curr_reid_score');
+curr_reid_score = getappdata(proc_handle, 'curr_reid_score');
 [~, sorted_gallery_id_list] = sort(curr_reid_score, 'descend');
 curr_groundtruth_rank = find(sorted_gallery_id_list==probe_id, 1);
 if ~feedback_info.consider_groundtruth_flag(repeat_times) && ...
-        ctrl_para.include_groundtruth_in_the_first_page_flag && curr_groundtruth_rank<=image_num_per_page 
-    feedback_info = getappdata(0, 'feedback_info');
+        ctrl_para.include_groundtruth_in_the_first_page_flag && ...
+        curr_groundtruth_rank<=image_num_per_page 
+    
+%     feedback_info = getappdata(0, 'feedback_info');
     [gallery_name_tab, stat_info] = feedback_stat(feedback_info);
     [include_groundtruth_flag, groundtruth_loc] = ismember(groundtruth_feedback.gallery_name, gallery_name_tab);
     if ~include_groundtruth_flag
@@ -21,7 +23,7 @@ if ~feedback_info.consider_groundtruth_flag(repeat_times) && ...
         rand_feedback_ix = feedback_info.rand_feedback_ix;
         [~,tot_query_times,~] = size(rand_feedback_ix);
         new_ix = [feedback_num+1;feedback_num+1];
-        start_ix = length(rand_feedback_ix{repeat_times, query_times-1, 1})+1; %´Óstart_ix´¦°Ñgroundtruth²åÈë
+        start_ix = length(rand_feedback_ix{repeat_times, query_times-1, 1})+1; %ï¿½ï¿½start_ixï¿½ï¿½ï¿½ï¿½groundtruthï¿½ï¿½ï¿½ï¿½
         for i=query_times:tot_query_times
             temp = [rand_feedback_ix{repeat_times, i, 1}; rand_feedback_ix{repeat_times, i, 2}];
             temp(:,start_ix) = new_ix;
@@ -56,11 +58,11 @@ if ~feedback_info.consider_groundtruth_flag(repeat_times) && ...
     end
     feedback_info.consider_groundtruth_flag(repeat_times) = 1;
     feedback_info.rand_feedback_ix = rand_feedback_ix;
-    setappdata(0, 'feedback_info', feedback_info);
+    setappdata(proc_handle, 'feedback_info', feedback_info);
 end
 
 %step2: generate feedback_info
-feedback_info = getappdata(0, 'feedback_info');
+% feedback_info = getappdata(proc_handle, 'feedback_info');
 rand_feedback_ix = feedback_info.rand_feedback_ix;
 curr_feedback_ix = [rand_feedback_ix{repeat_times, query_times, 1}; rand_feedback_ix{repeat_times, query_times, 2}];
 birth_run_tab = feedback_info.birth_run_tab;

@@ -23,7 +23,12 @@ if query_times == 1
     
     return;
 else
-    f0 = getappdata(proc_handle, 'curr_reid_score_for_pcm14');
+    if isappdata(proc_handle, 'curr_reid_score_for_pcm14')
+        f0 = getappdata(proc_handle, 'curr_reid_score_for_pcm14');
+    else
+        error('no app data!');
+    end
+    
     if isappdata(proc_handle, 'feedback_info_for_pcm14')
         feedback_info_for_pcm14 = getappdata(proc_handle, 'feedback_info_for_pcm14');
     else

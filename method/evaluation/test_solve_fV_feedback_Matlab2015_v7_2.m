@@ -120,7 +120,7 @@ for i=1:exp_times                                               % traverse all m
         reid_score_for_pcm14 = zeros(dataset_size,dataset_size, tot_query_times);
         reid_score_delta_for_pcm14 = zeros(dataset_size,dataset_size, tot_query_times);
 
-        tic
+        timer_start = clock;
         for s = 1:floor(dataset_size/batch_size)
             start = 0 + (s-1)*batch_size;
 
@@ -136,10 +136,11 @@ for i=1:exp_times                                               % traverse all m
                         test_baseline_pcm14_v4(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab, proc_handles(1,j));
                     
                     [f_bat{query_times, j}, V_bat{query_times, j}, para_set_bat{query_times, j}, J_val_bat{query_times, j}, iter_fVs_bat{query_times, j}] = ...
-                        solve_fV_test6(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab);   
+                        solve_fV_test6(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab, proc_handles(2,j));   
                 end
             end
-
+            
+            
             for j = 1:batch_size
                 id = start+j;
                 for query_times = 1:tot_query_times
@@ -174,6 +175,7 @@ for i=1:exp_times                                               % traverse all m
                 fprintf(1, repmat('\b', 1, nchar));
             end
         end
+        
 
         nchar = fprintf(1, '\t exp times.%d/%d (%3.2f%%) | repeat times %d/%d (%3.2f%%) | query times %d/%d (%3.2f%%): ...', ...
             i, exp_times, 100*i/exp_times, repeat_times, tot_repeat_times, 100*repeat_times/tot_repeat_times, ...
@@ -186,10 +188,10 @@ for i=1:exp_times                                               % traverse all m
                 ix_info_tab = [start+j; query_times; repeat_times];       % probe_id, query_times, repeat_times    
                 
                 [f_bat_for_pcm14{query_times, j}, feedback_set_for_pcm14{query_times, j}, f_delta_bat_for_pcm14{query_times, j}] = ...
-                        test_baseline_pcm14_v4(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab);
+                        test_baseline_pcm14_v4(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab, proc_handles(1,j));
                     
                 [f_bat{query_times, j}, V_bat{query_times, j}, para_set_bat{query_times, j}, J_val_bat{query_times, j}, iter_fVs_bat{query_times, j}] = ...
-                    solve_fV_test6(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab);   
+                    solve_fV_test6(ctrl_para, feedback_info_tab{start+j}, groundtruth_feedback{start+j}, ix_info_tab, proc_handles(2,j));   
             end
         end
         for j = 1:res
@@ -223,7 +225,8 @@ for i=1:exp_times                                               % traverse all m
         if ~ctrl_para.SHOW_DETAILS
             fprintf(1, repmat('\b', 1, nchar));
         end
-        run_time = toc;
+        timer_end = clock;
+        run_time = etime(timer_end,timer_start);
 
         cmc_result = zeros(dataset_size, tot_query_times);
         auc_result = zeros(1, tot_query_times);
